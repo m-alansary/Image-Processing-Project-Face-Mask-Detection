@@ -1,3 +1,3 @@
-from camera import test_and_detect
+from camera import test_and_detect, capture_training_images
 
-test_and_detect()
+print(capture_training_images("Ansary"))
