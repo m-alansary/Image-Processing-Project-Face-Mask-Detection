@@ -9,14 +9,14 @@ from threading import Thread
 def get_data(path):
     imagePaths = [os.path.join(path, f) for f in os.listdir(path)]
     faces = []
-    Ids = []
+    ids = []
     for imagePath in imagePaths:
         image = Image.open(imagePath).convert('L')
-        imageNp = np.array(image, 'uint8')
-        Id = int(float(os.path.split(imagePath)[-1].split(".")[1]))
-        faces.append(imageNp)
-        Ids.append(Id)
-    return faces, Ids
+        imageNo = np.array(image, 'uint8')
+        id = int(float(os.path.split(imagePath)[-1].split(".")[1]))
+        faces.append(imageN0)
+        ids.append(id)
+    return faces, ids
 
 
 def train_model():
