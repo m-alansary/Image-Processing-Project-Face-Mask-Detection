@@ -14,7 +14,7 @@ def get_data(path):
         image = Image.open(imagePath).convert('L')
         imageNo = np.array(image, 'uint8')
         id = int(float(os.path.split(imagePath)[-1].split(".")[1]))
-        faces.append(imageN0)
+        faces.append(imageNo)
         ids.append(id)
     return faces, ids
 
