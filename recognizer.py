@@ -11,6 +11,8 @@ threshold = 67 # percentage
 def recognize_attendence():
     recognizer = cv2.face.LBPHFaceRecognizer_create()  
     recognizer.read("Training Images Labels" + os.sep + "Trainner.yml")
+    recognizerMask = cv2.face.LBPHFaceRecognizer_create()  
+    recognizerMask.read("Training Images Mask Labels" + os.sep + "Trainner.yml")
     harcascadePath = "haarcascade_default.xml"
     faceCascade = cv2.CascadeClassifier(harcascadePath)
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -25,14 +27,21 @@ def recognize_attendence():
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         faces = faceCascade.detectMultiScale(gray, 1.2, 5,
                 minSize = (int(minWidth), int(minHight)), flags = cv2.CASCADE_SCALE_IMAGE)
+        masked = False
         for(p1, p2, p3, p4) in faces:
             cv2.rectangle(image, (p1, p2), (p1 + p3, p2 + p4), (0, 0, 255), 2) # BGR
-            id, conf = recognizer.predict(gray[p2 : p2 + p4, p1 : p1 + p3])
+            id, conf = recognizerMask.predict(gray[p2 : p2 + p4, p1 : p1 + p3])
+            if 100 - conf <= 65:
+                id, conf = recognizer.predict(gray[p2 : p2 + p4, p1 : p1 + p3])
+            else:
+                masked = True
             imageText = ""
             if 100 - conf > 0:
                 name = get_student(id)
                 confstr = "  {0}%".format(round(100 - conf))
                 imageText = str(id) + "-" + name + " [Pass]"
+                if masked:
+                    imageText += " [Masked]"
             else:
                 imageText = "\tUnknown\t"
                 confstr = "  {0}%".format(round(100 - conf))
