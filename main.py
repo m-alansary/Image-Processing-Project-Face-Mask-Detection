@@ -8,6 +8,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     mainWindow = MainWindow()
     mainWindow.showMaximized()
+    app.setStyle('Fusion')
     sys.exit(app.exec_())
 
 

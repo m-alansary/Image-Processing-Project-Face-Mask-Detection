@@ -1,32 +1,26 @@
-import sys
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from PySide2.QtCore import *
-import cv2
-from camera import Camera
+from GUI.cameraChart import CameraChart
+from GUI.studentsTable import StudentsTable
 
 
-class MainWindow(QWidget):
+class MainWindow(QMainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
-
-        self.title = QLabel()
-        self.image = QLabel()
-        self.camera = Camera()
-        self.camera.set_method("capture", {"name": "Ansary"})
-        self.camera.start()
-        self.camera.updateImage.connect(self.update_image)
+        self.cameraChart = CameraChart(self)
+        self.tabWidget = QTabWidget(self)
+        self.studentsTable = StudentsTable(self)
         self._init_ui()
-        self.setMinimumSize(640, 480)
 
     def _init_ui(self):
-        self.setLayout(QVBoxLayout())
-        self.layout().addWidget(self.title)
-        self.layout().addWidget(self.image)
-
-    def update_image(self, title, image):
-        self.title.setText(title)
-        self.image.setPixmap(QPixmap.fromImage(image))
+        widget = QWidget()
+        self.tabWidget.addTab(self.studentsTable, "Students")
+        self.tabWidget.addTab(QWidget(), "Attendance")
+        widget.setLayout(QHBoxLayout())
+        widget.layout().addWidget(self.cameraChart)
+        widget.layout().addWidget(self.tabWidget)
+        self.setCentralWidget(widget)
 
 
 
