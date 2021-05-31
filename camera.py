@@ -15,10 +15,10 @@ class Camera(QThread):
 
     def run(self):
         self.isActive = True
-        if self.name == "test":
+        if self.name == "test_and_detect":
             self.test_and_detect()
-        elif self.name == "capture":
-            self.capture_training_images(self.params["name"])
+        elif self.name == "capture_training_images":
+            self.capture_training_images(self.params["name"], self.params["id"])
 
     def test_and_detect(self):
         # Load the cascade
@@ -46,8 +46,8 @@ class Camera(QThread):
         cap.release()
         cv2.destroyAllWindows()
 
-    def capture_training_images(self, name, id=currentId, path="Training Images"):
-        if name.isalpha():
+    def capture_training_images(self, name: str, id: int, path="Training Images"):
+        if name.replace(" ", "").isalpha():
             cam = cv2.VideoCapture(0)
             detector = cv2.CascadeClassifier("haarcascade_default.xml")
             imageNo = 0
@@ -63,7 +63,7 @@ class Camera(QThread):
                     cv2.imwrite(path + os.sep + name + "." + str(id) + '.' +
                                 str(imageNo) + ".jpg", gray[p2: p2 + p4, p1: p1 + p3])
 
-                self.emit_image('Capturing', image)
+                self.emit_image("Capturing Training Images", image)
 
                 if cv2.waitKey(100) & 0xFF == ord('q'):
                     break

@@ -1,5 +1,6 @@
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
+from camera import Camera
 
 
 class CameraChart(QWidget):
@@ -28,4 +29,10 @@ class CameraChart(QWidget):
     def update_image(self, title, image):
         self.title.setText(title)
         self.image.setPixmap(QPixmap.fromImage(image))
+
+    def capture_images(self, id: int, name: str):
+        self.camera = Camera()
+        self.camera.set_method("capture_training_images", {"id": id, "name": name})
+        self.camera.start()
+        self.camera.updateImage.connect(self.update_image)
 

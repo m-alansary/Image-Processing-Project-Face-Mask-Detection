@@ -1,11 +1,14 @@
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from PySide2 import QtGui
+from PySide2.QtCore import Signal
 from PySide2.QtCore import Qt
 import csv
 
 
 class StudentsTable(QWidget):
+    captureImages = Signal(int, str)
+
     def __init__(self, parent=None):
         super(StudentsTable, self).__init__(parent)
         self.csvFileName = "Data/students.csv"
@@ -42,7 +45,8 @@ class StudentsTable(QWidget):
     def _add_btn_clicked(self):
         row = self.table.rowCount()
         self.table.insertRow(row)
-        btn = QPushButton("Start")
+        btn = QPushButton("Capture Training Images")
+        btn.clicked.connect(lambda: self.capture_images(row))
         self.table.setCellWidget(row, 3, btn)
 
     def _remove_btn_clicked(self):
@@ -53,6 +57,11 @@ class StudentsTable(QWidget):
         rowsToDelete.sort(reverse=True)
         for row in rowsToDelete:
             self.table.removeRow(row)
+
+    def _add_btn_at_row(self, row):
+        btn = QPushButton("Capture Training Images")
+        btn.clicked.connect(lambda: self.capture_images(row))
+        self.table.setCellWidget(row, 3, btn)
 
     def _save_btn_clicked(self):
         self.write_csv()
@@ -70,8 +79,7 @@ class StudentsTable(QWidget):
                         item = QTableWidgetItem(rowData[col])
                         self.table.setItem(row - 1, col, item)
                 if row != 0:
-                    btn = QPushButton("Start")
-                    self.table.setCellWidget(row - 1, 3, btn)
+                    self._add_btn_at_row(row - 1)
                 row += 1
 
     def write_csv(self):
@@ -87,3 +95,8 @@ class StudentsTable(QWidget):
                 for col in range(0, self.table.columnCount() - 1):
                     fields.append(self.table.item(row, col).text())
                 writer.writerow(fields)
+
+    def capture_images(self, row):
+        id = int(self.table.item(row, 0).text())
+        name = self.table.item(row, 1).text()
+        self.captureImages.emit(id, name)
