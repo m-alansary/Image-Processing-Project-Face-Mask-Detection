@@ -22,9 +22,17 @@ class MainWindow(QMainWindow):
 
     def _start_communication(self):
         self.studentsWidget.captureImages.connect(self.capture_images)
+        self.studentsWidget.takeAttendance.connect(self.take_attendance)
+        self.studentsWidget.endAttendance.connect(self.end_attendance)
 
     def capture_images(self, id: int, name: str):
         self.cameraChart.capture_images(id, name)
+
+    def take_attendance(self, students: dict):
+        self.cameraChart.take_attendance(students)
+
+    def end_attendance(self):
+        self.cameraChart.end_attendance()
 
 
 

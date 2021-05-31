@@ -5,10 +5,13 @@ from PySide2.QtCore import Signal
 from PySide2.QtCore import Qt
 import csv
 from modelTraining import train_model
+from recognizer import recognize_attendence
 
 
 class StudentsWidget(QWidget):
     captureImages = Signal(int, str)
+    takeAttendance = Signal(dict)
+    endAttendance = Signal()
 
     def __init__(self, parent=None):
         super(StudentsWidget, self).__init__(parent)
@@ -20,6 +23,7 @@ class StudentsWidget(QWidget):
         self.removeBtn = QPushButton("Remove")
         self.saveBtn = QPushButton("Save")
         self.trainBtn = QPushButton("Train Model")
+        self.attendanceBtn = QPushButton("Take Attendance")
         self._init_ui()
         self._start_communication()
         self.load_csv()
@@ -39,6 +43,10 @@ class StudentsWidget(QWidget):
         attendanceWidget = QWidget(self)
         attendanceWidget.setLayout(QHBoxLayout())
         attendanceWidget.layout().addWidget(self.attendanceTable)
+        btnsLayout = QVBoxLayout(self)
+        btnsLayout.addWidget(self.attendanceBtn)
+        btnsLayout.addStretch()
+        attendanceWidget.layout().addLayout(btnsLayout)
         self.tabWidget.addTab(studentsWidget, "Students")
         self.tabWidget.addTab(attendanceWidget, "Attendance")
         self.layout().addWidget(self.tabWidget)
@@ -55,6 +63,7 @@ class StudentsWidget(QWidget):
         self.removeBtn.clicked.connect(self._remove_btn_clicked)
         self.saveBtn.clicked.connect(self._save_btn_clicked)
         self.trainBtn.clicked.connect(train_model)
+        self.attendanceBtn.clicked.connect(self.take_attendance)
 
     def _add_btn_clicked(self):
         row = self.studentsTable.rowCount()
@@ -76,6 +85,21 @@ class StudentsWidget(QWidget):
         btn = QPushButton("Capture Training Images")
         btn.clicked.connect(lambda: self.capture_images(row))
         self.studentsTable.setCellWidget(row, 3, btn)
+
+    def take_attendance(self):
+        if self.attendanceBtn.text() == "Take Attendance":
+            students = self.get_students()
+            self.takeAttendance.emit(students)
+            self.attendanceBtn.setText("Finish")
+        else:
+            self.endAttendance.emit()
+            self.attendanceBtn.setText("Take Attendance")
+
+    def get_students(self):
+        students = {}
+        for row in range(self.studentsTable.rowCount()):
+            students[int(self.studentsTable.item(row, 0).text())] = self.studentsTable.item(row, 1).text()
+        return students
 
     def _save_btn_clicked(self):
         self.write_csv()

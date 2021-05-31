@@ -36,3 +36,12 @@ class CameraChart(QWidget):
         self.camera.start()
         self.camera.updateImage.connect(self.update_image)
 
+    def take_attendance(self, students: dict):
+        self.camera = Camera()
+        self.camera.set_method("recognize_attendence", {"students": students})
+        self.camera.start()
+        self.camera.updateImage.connect(self.update_image)
+
+    def end_attendance(self):
+        self.camera.stop()
+

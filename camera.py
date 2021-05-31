@@ -1,9 +1,13 @@
 import csv
 import cv2
 import os
+import time
 from studentsData import add_student, add_masked_student, currentId
 from PySide2.QtCore import *
 from PySide2.QtGui import *
+from studentsData import get_student, attend_studnet
+
+threshold = 67  # percentage
 
 
 class Camera(QThread):
@@ -19,6 +23,8 @@ class Camera(QThread):
             self.test_and_detect()
         elif self.name == "capture_training_images":
             self.capture_training_images(self.params["name"], self.params["id"])
+        elif self.name == "recognize_attendence":
+            self.recognize_attendence(self.params["students"])
 
     def test_and_detect(self):
         # Load the cascade
@@ -82,6 +88,64 @@ class Camera(QThread):
 
             return row
 
+    def recognize_attendence(self, students: dict):
+        recognizer = cv2.face.LBPHFaceRecognizer_create()
+        recognizer.read("Training Images Labels" + os.sep + "Trainner.yml")
+        # recognizerMask = cv2.face.LBPHFaceRecognizer_create()
+        # recognizerMask.read("Training Images Mask Labels" + os.sep + "Trainner.yml")
+        harcascadePath = "haarcascade_default.xml"
+        faceCascade = cv2.CascadeClassifier(harcascadePath)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        cam.set(3, 640)
+        cam.set(4, 480)
+        minWidth = 0.1 * cam.get(3)
+        minHight = 0.1 * cam.get(4)
+
+        while self.isActive:
+            ret, image = cam.read()
+            gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+            faces = faceCascade.detectMultiScale(gray, 1.2, 5,
+                                                 minSize=(int(minWidth), int(minHight)), flags=cv2.CASCADE_SCALE_IMAGE)
+            masked = False
+            for (p1, p2, p3, p4) in faces:
+                cv2.rectangle(image, (p1, p2), (p1 + p3, p2 + p4), (0, 0, 255), 2)  # BGR
+                # id, conf = recognizerMask.predict(gray[p2 : p2 + p4, p1 : p1 + p3])
+                # if 100 - conf <= 65:
+                id, conf = recognizer.predict(gray[p2: p2 + p4, p1: p1 + p3])
+                # else:
+                #     masked = True
+                imageText = ""
+                if 100 - conf > 0:
+                    name = students[id]
+                    confstr = "  {0}%".format(round(100 - conf))
+                    imageText = str(id) + "-" + name + " [Pass]"
+                    if masked:
+                        imageText += " [Masked]"
+                else:
+                    imageText = "\tUnknown\t"
+                    confstr = "  {0}%".format(round(100 - conf))
+
+                if 100 - conf > threshold:
+                    ts = time.time()
+                    attend_studnet(id, ts)
+
+                cv2.putText(image, str(imageText), (p1 + 5, p2 - 5), font, 1, (255, 255, 255), 2)
+
+                if (100 - conf) > threshold:
+                    cv2.putText(image, str(confstr), (p1 + 5, p2 + p4 - 5), font, 1, (0, 255, 0), 1)
+                elif (100 - conf) > 50:
+                    cv2.putText(image, str(confstr), (p1 + 5, p2 + p4 - 5), font, 1, (0, 255, 255), 1)
+                else:
+                    cv2.putText(image, str(confstr), (p1 + 5, p2 + p4 - 5), font, 1, (0, 0, 255), 1)
+
+            self.emit_image("Taking Attendance", image)
+            if cv2.waitKey(1) == ord('q'):
+                break
+
+        cam.release()
+        cv2.destroyAllWindows()
+
     def emit_image(self, title, image):
         if image is not None:
             height, width, bytesPerComponent = image.shape
@@ -95,6 +159,7 @@ class Camera(QThread):
             self.updateImage.emit('', QImage())
 
     def stop(self):
+        self.emit_image('', None)
         self.isActive = False
         self.quit()
 
