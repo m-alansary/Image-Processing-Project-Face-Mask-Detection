@@ -4,6 +4,7 @@ from PySide2 import QtGui
 from PySide2.QtCore import Signal
 from PySide2.QtCore import Qt
 import csv
+from modelTraining import train_model
 
 
 class StudentsWidget(QWidget):
@@ -18,6 +19,7 @@ class StudentsWidget(QWidget):
         self.addBtn = QPushButton("Add")
         self.removeBtn = QPushButton("Remove")
         self.saveBtn = QPushButton("Save")
+        self.trainBtn = QPushButton("Train Model")
         self._init_ui()
         self._start_communication()
         self.load_csv()
@@ -30,6 +32,7 @@ class StudentsWidget(QWidget):
         btnsLayout.addWidget(self.addBtn)
         btnsLayout.addWidget(self.removeBtn)
         btnsLayout.addWidget(self.saveBtn)
+        btnsLayout.addWidget(self.trainBtn)
         btnsLayout.addStretch()
         studentsWidget.layout().addWidget(self.studentsTable)
         studentsWidget.layout().addLayout(btnsLayout)
@@ -51,6 +54,7 @@ class StudentsWidget(QWidget):
         self.addBtn.clicked.connect(self._add_btn_clicked)
         self.removeBtn.clicked.connect(self._remove_btn_clicked)
         self.saveBtn.clicked.connect(self._save_btn_clicked)
+        self.trainBtn.clicked.connect(train_model)
 
     def _add_btn_clicked(self):
         row = self.studentsTable.rowCount()
