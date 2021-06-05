@@ -25,10 +25,27 @@ class CameraChart(QWidget):
     def _init_style(self):
         self.image.setFixedSize(640, 480)
         self.setFixedWidth(640)
+        self.infoTable.setRowCount(2)
+        self.infoTable.setColumnCount(1)
+        self.infoTable.setVerticalHeaderLabels(["ID", "Name"])
+        item = QTableWidgetItem()
+        item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+        self.infoTable.setItem(0, 0, item)
+        item2 = QTableWidgetItem()
+        item2.setFlags(item2.flags() ^ Qt.ItemIsEditable)
+        self.infoTable.setItem(1, 0, item2)
+        self.infoTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.infoTable.horizontalHeader().hide()
 
-    def update_image(self, title, image):
+    def update_image(self, title, image, data):
         self.title.setText(title)
         self.image.setPixmap(QPixmap.fromImage(image))
+        if data:
+            self.infoTable.item(0, 0).setText(data["id"])
+            self.infoTable.item(1, 0).setText(data["name"])
+        else:
+            self.infoTable.item(0, 0).setText("")
+            self.infoTable.item(1, 0).setText("")
 
     def capture_images(self, id: int, name: str):
         self.camera = Camera()

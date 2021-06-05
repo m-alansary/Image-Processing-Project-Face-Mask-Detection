@@ -11,7 +11,7 @@ threshold = 67  # percentage
 
 
 class Camera(QThread):
-    updateImage = Signal(str, QImage)  # Title, image
+    updateImage = Signal(str, QImage, dict)  # Title, image
 
     def set_method(self, name, params={}):
         self.name = name
@@ -69,7 +69,7 @@ class Camera(QThread):
                     cv2.imwrite(path + os.sep + name + "." + str(id) + '.' +
                                 str(imageNo) + ".jpg", gray[p2: p2 + p4, p1: p1 + p3])
 
-                self.emit_image("Capturing Training Images", image)
+                self.emit_image("Capturing Training Images", image, {"id": str(id), "name": name})
 
                 if cv2.waitKey(100) & 0xFF == ord('q'):
                     break
@@ -81,10 +81,6 @@ class Camera(QThread):
             self.emit_image('', None)
 
             row = [id, name]
-            if id == currentId:
-                add_student(name)
-            else:
-                add_masked_student(name)
 
             return row
 
@@ -103,6 +99,7 @@ class Camera(QThread):
         minHight = 0.1 * cam.get(4)
 
         while self.isActive:
+            data = {}
             ret, image = cam.read()
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             faces = faceCascade.detectMultiScale(gray, 1.2, 5,
@@ -120,6 +117,8 @@ class Camera(QThread):
                     name = students[id]
                     confstr = "  {0}%".format(round(100 - conf))
                     imageText = str(id) + "-" + name + " [Pass]"
+                    data["id"] = str(id)
+                    data["name"] = name
                     if masked:
                         imageText += " [Masked]"
                 else:
@@ -139,14 +138,15 @@ class Camera(QThread):
                 else:
                     cv2.putText(image, str(confstr), (p1 + 5, p2 + p4 - 5), font, 1, (0, 0, 255), 1)
 
-            self.emit_image("Taking Attendance", image)
+            self.emit_image("Taking Attendance", image, data)
             if cv2.waitKey(1) == ord('q'):
                 break
 
         cam.release()
         cv2.destroyAllWindows()
+        self.emit_image('', None)
 
-    def emit_image(self, title, image):
+    def emit_image(self, title, image, data={}):
         if image is not None:
             height, width, bytesPerComponent = image.shape
             bytesPerLine = bytesPerComponent * width
@@ -154,9 +154,9 @@ class Camera(QThread):
 
             imageConversion = QImage(image.data, width, height, bytesPerLine, QImage.Format_RGB888)
             # qtImage = imageConversion.scaled(640, 480, Qt.KeepAspectRatio)
-            self.updateImage.emit(title, imageConversion)
+            self.updateImage.emit(title, imageConversion, data)
         else:
-            self.updateImage.emit('', QImage())
+            self.updateImage.emit('', QImage(), data)
 
     def stop(self):
         self.emit_image('', None)
