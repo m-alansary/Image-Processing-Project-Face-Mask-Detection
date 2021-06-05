@@ -51,12 +51,16 @@ class StudentsWidget(QWidget):
         self.tabWidget.addTab(attendanceWidget, "Attendance")
         self.layout().addWidget(self.tabWidget)
 
-        self.studentsTable.verticalHeader().hide()
         self.studentsTable.setColumnCount(4)
         header = self.studentsTable.horizontalHeader()
         for col in range(self.studentsTable.columnCount()):
             header.setSectionResizeMode(col, QHeaderView.Stretch)
         self.studentsTable.setHorizontalHeaderItem(3, QTableWidgetItem("Take Images Data"))
+        self.attendanceTable.setColumnCount(2)
+        self.attendanceTable.setHorizontalHeaderLabels(["ID", "Name"])
+        header = self.attendanceTable.horizontalHeader()
+        for col in range(self.attendanceTable.columnCount()):
+            header.setSectionResizeMode(col, QHeaderView.Stretch)
 
     def _start_communication(self):
         self.addBtn.clicked.connect(self._add_btn_clicked)
@@ -100,6 +104,18 @@ class StudentsWidget(QWidget):
         for row in range(self.studentsTable.rowCount()):
             students[int(self.studentsTable.item(row, 0).text())] = self.studentsTable.item(row, 1).text()
         return students
+
+    def set_attendance(self, data):
+        self.attendanceTable.setRowCount(0)
+        row = 0
+        for id in data:
+            self.attendanceTable.insertRow(row)
+            item = QTableWidgetItem(id)
+            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+            self.attendanceTable.setItem(row, 0, item)
+            item = QTableWidgetItem(data[id])
+            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+            self.attendanceTable.setItem(row, 1, item)
 
     def _save_btn_clicked(self):
         self.write_csv()

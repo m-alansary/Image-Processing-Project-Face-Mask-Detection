@@ -32,7 +32,8 @@ class MainWindow(QMainWindow):
         self.cameraChart.take_attendance(students)
 
     def end_attendance(self):
-        self.cameraChart.end_attendance()
+        data = self.cameraChart.end_attendance()
+        self.studentsWidget.set_attendance(data)
 
 
 

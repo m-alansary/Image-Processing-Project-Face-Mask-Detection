@@ -99,7 +99,7 @@ class Camera(QThread):
         minHight = 0.1 * cam.get(4)
 
         while self.isActive:
-            data = {}
+            data = {"isAttendance": True}
             ret, image = cam.read()
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             faces = faceCascade.detectMultiScale(gray, 1.2, 5,

@@ -9,6 +9,7 @@ class CameraChart(QWidget):
         self.title = QLabel(self)
         self.image = QLabel(self)
         self.infoTable = QTableWidget(self)
+        self.attendanceData = {}
         self.camera = None
         # self.camera.set_method("capture", {"name": "Ansary"})
         # self.camera.start()
@@ -37,12 +38,16 @@ class CameraChart(QWidget):
         self.infoTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.infoTable.horizontalHeader().hide()
 
-    def update_image(self, title, image, data):
+    def update_image(self, title, image, data={}):
         self.title.setText(title)
         self.image.setPixmap(QPixmap.fromImage(image))
         if data:
-            self.infoTable.item(0, 0).setText(data["id"])
-            self.infoTable.item(1, 0).setText(data["name"])
+            if data["id"]:
+                self.infoTable.item(0, 0).setText(data["id"])
+            if data["name"]:
+                self.infoTable.item(1, 0).setText(data["name"])
+            if data["isAttendance"]:
+                self.attendanceData[data["id"]] = data["name"]
         else:
             self.infoTable.item(0, 0).setText("")
             self.infoTable.item(1, 0).setText("")
@@ -54,6 +59,7 @@ class CameraChart(QWidget):
         self.camera.updateImage.connect(self.update_image)
 
     def take_attendance(self, students: dict):
+        self.attendanceData = {}
         self.camera = Camera()
         self.camera.set_method("recognize_attendence", {"students": students})
         self.camera.start()
@@ -61,4 +67,5 @@ class CameraChart(QWidget):
 
     def end_attendance(self):
         self.camera.stop()
+        return self.attendanceData
 
