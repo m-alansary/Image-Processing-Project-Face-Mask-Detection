@@ -2,6 +2,10 @@ import csv
 import cv2
 import os
 import time
+import sys
+
+from PySide2.QtWidgets import QMessageBox, QApplication
+
 from studentsData import add_student, add_masked_student, currentId
 from PySide2.QtCore import *
 from PySide2.QtGui import *
@@ -23,6 +27,9 @@ class Camera(QThread):
             self.test_and_detect()
         elif self.name == "capture_training_images":
             self.capture_training_images(self.params["name"], self.params["id"])
+            # reply = QMessageBox.information(None, "Mask is Requiried", "Please put on your mask.", QMessageBox.Ok)
+            # if reply == QMessageBox.Ok:
+            self.capture_training_images(self.params["name"], self.params["id"], "Training Mask Images")
         elif self.name == "recognize_attendence":
             self.recognize_attendence(self.params["students"])
 
@@ -31,10 +38,10 @@ class Camera(QThread):
         cascadeFace = cv2.CascadeClassifier('haarcascade_default.xml')
 
         # Capture the video from webcam
-        cap = cv2.VideoCapture(0)
+        cam = cv2.VideoCapture(0)
 
         while self.isActive:
-            _, image = cap.read()
+            _, image = cam.read()
 
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
@@ -49,31 +56,31 @@ class Camera(QThread):
                 break
 
         self.emit_image('', None)
-        cap.release()
+        cam.release()
         cv2.destroyAllWindows()
 
     def capture_training_images(self, name: str, id: int, path="Training Images"):
         if name.replace(" ", "").isalpha():
-            cam = cv2.VideoCapture(0)
+            cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             detector = cv2.CascadeClassifier("haarcascade_default.xml")
             imageNo = 0
 
             while self.isActive:
-                ret, image = cam.read()
+                _, image = cam.read()
                 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
                 faces = detector.detectMultiScale(gray, 1.3, 5, minSize=(30, 30), flags=cv2.CASCADE_SCALE_IMAGE)
 
-                for (p1, p2, p3, p4) in faces:
-                    cv2.rectangle(image, (p1, p2), (p1 + p3, p2 + p4), (0, 0, 255), 2)  # BGR
+                for (x, y, w, h) in faces:
+                    cv2.rectangle(image, (x, y), (x + w, y + h), (0, 0, 255), 2)  # BGR
                     imageNo += 1
                     cv2.imwrite(path + os.sep + name + "." + str(id) + '.' +
-                                str(imageNo) + ".jpg", gray[p2: p2 + p4, p1: p1 + p3])
+                                str(imageNo) + ".jpg", gray[y: y + h, x: x + w])
 
-                self.emit_image("Capturing Training Images", image, {"id": str(id), "name": name})
+                self.emit_image("Capturing " + path, image, {"id": str(id), "name": name})
 
                 if cv2.waitKey(100) & 0xFF == ord('q'):
                     break
-                elif imageNo > 100:
+                if imageNo > 100:
                     break
 
             cam.release()
@@ -87,8 +94,8 @@ class Camera(QThread):
     def recognize_attendence(self, students: dict):
         recognizer = cv2.face.LBPHFaceRecognizer_create()
         recognizer.read("Training Images Labels" + os.sep + "Trainner.yml")
-        # recognizerMask = cv2.face.LBPHFaceRecognizer_create()
-        # recognizerMask.read("Training Images Mask Labels" + os.sep + "Trainner.yml")
+        recognizerMask = cv2.face.LBPHFaceRecognizer_create()
+        recognizerMask.read("Training Images Labels" + os.sep + "Mask Trainner.yml")
         harcascadePath = "haarcascade_default.xml"
         faceCascade = cv2.CascadeClassifier(harcascadePath)
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -107,20 +114,22 @@ class Camera(QThread):
             masked = False
             for (p1, p2, p3, p4) in faces:
                 cv2.rectangle(image, (p1, p2), (p1 + p3, p2 + p4), (0, 0, 255), 2)  # BGR
-                # id, conf = recognizerMask.predict(gray[p2 : p2 + p4, p1 : p1 + p3])
-                # if 100 - conf <= 65:
-                id, conf = recognizer.predict(gray[p2: p2 + p4, p1: p1 + p3])
-                # else:
-                #     masked = True
+                idd, conf = recognizerMask.predict(gray[p2 : p2 + p4, p1 : p1 + p3])
+                if 100 - conf <= 65:
+                    id, conf = recognizer.predict(gray[p2: p2 + p4, p1: p1 + p3])
+                else:
+                    masked = True
                 imageText = ""
                 if 100 - conf > 0:
                     name = students[id]
                     confstr = "  {0}%".format(round(100 - conf))
-                    imageText = str(id) + "-" + name + " [Pass]"
+                    imageText = str(id) + "-" + name
                     data["id"] = str(id)
                     data["name"] = name
                     if masked:
                         imageText += " [Masked]"
+                    else:
+                        imageText += " [Not Masked]"
                 else:
                     imageText = "\tUnknown\t"
                     confstr = "  {0}%".format(round(100 - conf))
