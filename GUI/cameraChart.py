@@ -11,6 +11,9 @@ class CameraChart(QWidget):
         self.infoTable = QTableWidget(self)
         self.attendanceData = {}
         self.camera = None
+        self.captureMaskNext = False
+        self.currentId = ""
+        self.currentName = ""
         # self.camera.set_method("test_and_detect")
         # self.camera.start()
         # self.camera.updateImage.connect(self.update_image)
@@ -57,12 +60,23 @@ class CameraChart(QWidget):
         else:
             self.infoTable.item(0, 0).setText("")
             self.infoTable.item(1, 0).setText("")
+        if title == "" and self.captureMaskNext:
+            reply = QMessageBox.information(None, "Mask is Requiried", "Please put on your mask.", QMessageBox.Ok)
+            if reply == QMessageBox.Ok:
+                self.camera = Camera()
+                self.camera.set_method("capture_mask_training_images", {"id": self.currentId, "name": self.currentName})
+                self.camera.start()
+                self.camera.updateImage.connect(self.update_image)
+            self.captureMaskNext = False
 
     def capture_images(self, id: int, name: str):
         self.camera = Camera()
         self.camera.set_method("capture_training_images", {"id": id, "name": name})
         self.camera.start()
         self.camera.updateImage.connect(self.update_image)
+        self.captureMaskNext = True
+        self.currentId = id
+        self.currentName = name
 
     def take_attendance(self, students: dict):
         self.attendanceData = {}

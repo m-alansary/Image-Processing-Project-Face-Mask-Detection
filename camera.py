@@ -27,8 +27,7 @@ class Camera(QThread):
             self.test_and_detect()
         elif self.name == "capture_training_images":
             self.capture_training_images(self.params["name"], self.params["id"])
-            # reply = QMessageBox.information(None, "Mask is Requiried", "Please put on your mask.", QMessageBox.Ok)
-            # if reply == QMessageBox.Ok:
+        elif self.name == "capture_mask_training_images":
             self.capture_training_images(self.params["name"], self.params["id"], "Training Mask Images")
         elif self.name == "recognize_attendence":
             self.recognize_attendence(self.params["students"])
@@ -114,7 +113,7 @@ class Camera(QThread):
             masked = False
             for (p1, p2, p3, p4) in faces:
                 cv2.rectangle(image, (p1, p2), (p1 + p3, p2 + p4), (0, 0, 255), 2)  # BGR
-                idd, conf = recognizerMask.predict(gray[p2 : p2 + p4, p1 : p1 + p3])
+                id, conf = recognizerMask.predict(gray[p2: p2 + p4, p1: p1 + p3])
                 if 100 - conf <= 65:
                     id, conf = recognizer.predict(gray[p2: p2 + p4, p1: p1 + p3])
                 else:
