@@ -66,7 +66,7 @@ class StudentsWidget(QWidget):
         self.addBtn.clicked.connect(self._add_btn_clicked)
         self.removeBtn.clicked.connect(self._remove_btn_clicked)
         self.saveBtn.clicked.connect(self._save_btn_clicked)
-        self.trainBtn.clicked.connect(train_model)
+        self.trainBtn.clicked.connect(self._train_btn_clicked)
         self.attendanceBtn.clicked.connect(self.take_attendance)
 
     def _add_btn_clicked(self):
@@ -84,6 +84,13 @@ class StudentsWidget(QWidget):
         rowsToDelete.sort(reverse=True)
         for row in rowsToDelete:
             self.studentsTable.removeRow(row)
+
+    def _train_btn_clicked(self):
+        self.trainBtn.setEnabled(False)
+        self.trainBtn.setText("Training...")
+        train_model()
+        self.trainBtn.setText("Train Model")
+        self.trainBtn.setEnabled(True)
 
     def _add_btn_at_row(self, row):
         btn = QPushButton("Capture Training Images")

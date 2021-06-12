@@ -11,6 +11,9 @@ class CameraChart(QWidget):
         self.infoTable = QTableWidget(self)
         self.attendanceData = {}
         self.camera = None
+        # self.camera.set_method("test_and_detect")
+        # self.camera.start()
+        # self.camera.updateImage.connect(self.update_image)
         # self.camera.set_method("capture", {"name": "Ansary"})
         # self.camera.start()
         # self.camera.updateImage.connect(self.update_image)
@@ -42,12 +45,15 @@ class CameraChart(QWidget):
         self.title.setText(title)
         self.image.setPixmap(QPixmap.fromImage(image))
         if data:
-            if data["id"]:
-                self.infoTable.item(0, 0).setText(data["id"])
-            if data["name"]:
-                self.infoTable.item(1, 0).setText(data["name"])
-            if data["isAttendance"]:
-                self.attendanceData[data["id"]] = data["name"]
+            if "id" in data:
+                if data["id"]:
+                    self.infoTable.item(0, 0).setText(data["id"])
+            if "name" in data:
+                if data["name"]:
+                    self.infoTable.item(1, 0).setText(data["name"])
+                if "isAttendance" in data:
+                    if data["isAttendance"]:
+                        self.attendanceData[data["id"]] = data["name"]
         else:
             self.infoTable.item(0, 0).setText("")
             self.infoTable.item(1, 0).setText("")

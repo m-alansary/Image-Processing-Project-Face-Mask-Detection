@@ -21,13 +21,10 @@ def get_data(path):
 
 def train_model():
     recognizer = cv2.face.LBPHFaceRecognizer_create()
-    harcascadePath = "haarcascade_default.xml"
-    detector = cv2.CascadeClassifier(harcascadePath)
     faces, Id = get_data("Training Images")
     Thread(target = recognizer.train(faces, np.array(Id))).start()
     recognizer.save("Training Images Labels" + os.sep + "Trainner.yml")
-    # recognizer = cv2.face.LBPHFaceRecognizer_create()
-    # detector = cv2.CascadeClassifier(harcascadePath)
-    # faces, Id = get_data("Training Mask Images")
-    # Thread(target = recognizer.train(faces, np.array(Id))).start()
-    # recognizer.save("Training Images Mask Labels" + os.sep + "Trainner.yml")
+    recognizer = cv2.face.LBPHFaceRecognizer_create()
+    faces, Id = get_data("Training Mask Images")
+    Thread(target = recognizer.train(faces, np.array(Id))).start()
+    recognizer.save("Training Images Labels" + os.sep + "Mask Trainner.yml")
