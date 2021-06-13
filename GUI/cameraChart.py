@@ -32,15 +32,18 @@ class CameraChart(QWidget):
     def _init_style(self):
         self.image.setFixedSize(640, 480)
         self.setFixedWidth(640)
-        self.infoTable.setRowCount(2)
+        self.infoTable.setRowCount(3)
         self.infoTable.setColumnCount(1)
-        self.infoTable.setVerticalHeaderLabels(["ID", "Name"])
+        self.infoTable.setVerticalHeaderLabels(["ID", "Name", "Is Masked?"])
         item = QTableWidgetItem()
         item.setFlags(item.flags() ^ Qt.ItemIsEditable)
         self.infoTable.setItem(0, 0, item)
         item2 = QTableWidgetItem()
         item2.setFlags(item2.flags() ^ Qt.ItemIsEditable)
         self.infoTable.setItem(1, 0, item2)
+        item3 = QTableWidgetItem()
+        item3.setFlags(item2.flags() ^ Qt.ItemIsEditable)
+        self.infoTable.setItem(2, 0, item3)
         self.infoTable.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.infoTable.horizontalHeader().hide()
 
@@ -51,15 +54,27 @@ class CameraChart(QWidget):
             if "id" in data:
                 if data["id"]:
                     self.infoTable.item(0, 0).setText(data["id"])
+            else:
+                self.infoTable.item(0, 0).setText("")
             if "name" in data:
                 if data["name"]:
                     self.infoTable.item(1, 0).setText(data["name"])
                 if "isAttendance" in data:
                     if data["isAttendance"]:
                         self.attendanceData[data["id"]] = data["name"]
+            else:
+                self.infoTable.item(1, 0).setText("")
+            if "masked" in data:
+                if data["masked"]:
+                    self.infoTable.item(2, 0).setText("Yes")
+                else:
+                    self.infoTable.item(2, 0).setText("No")
+            else:
+                self.infoTable.item(2, 0).setText("")
         else:
             self.infoTable.item(0, 0).setText("")
             self.infoTable.item(1, 0).setText("")
+            self.infoTable.item(2, 0).setText("")
         if title == "" and self.captureMaskNext:
             reply = QMessageBox.information(None, "Mask is Requiried", "Please put on your mask.", QMessageBox.Ok)
             if reply == QMessageBox.Ok:

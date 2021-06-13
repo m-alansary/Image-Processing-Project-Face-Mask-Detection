@@ -127,8 +127,10 @@ class Camera(QThread):
                     data["name"] = name
                     if masked:
                         imageText += " [Masked]"
+                        data["masked"] = True
                     else:
                         imageText += " [Not Masked]"
+                        data["masked"] = False
                 else:
                     imageText = "\tUnknown\t"
                     confstr = "  {0}%".format(round(100 - conf))

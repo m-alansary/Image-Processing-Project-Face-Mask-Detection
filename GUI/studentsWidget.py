@@ -88,6 +88,7 @@ class StudentsWidget(QWidget):
     def _train_btn_clicked(self):
         self.trainBtn.setEnabled(False)
         self.trainBtn.setText("Training...")
+        QApplication.processEvents()
         train_model()
         self.trainBtn.setText("Train Model")
         self.trainBtn.setEnabled(True)
