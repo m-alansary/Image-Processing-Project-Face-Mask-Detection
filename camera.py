@@ -148,7 +148,7 @@ class Camera(QThread):
                 if 100 - conf > 0:
                     name = students[id]
                     confstr = "  {0}%".format(round(100 - conf))
-                    imageText = str(id) + "-" + name
+                    imageText = str(id)
                     data["id"] = str(id)
                     data["name"] = name
                     if masked:
