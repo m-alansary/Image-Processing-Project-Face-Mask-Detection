@@ -4,12 +4,8 @@ import os
 import time
 import sys
 
-from PySide2.QtWidgets import QMessageBox, QApplication
-
-from studentsData import add_student, add_masked_student, currentId
 from PySide2.QtCore import *
 from PySide2.QtGui import *
-from studentsData import get_student, attend_studnet
 
 threshold = 67  # percentage
 
@@ -167,7 +163,6 @@ class Camera(QThread):
 
                 if 100 - conf > threshold:
                     ts = time.time()
-                    attend_studnet(id, ts)
 
                 cv2.putText(image, str(imageText), (p1 + 5, p2 - 5), font, 1, (255, 255, 255), 2)
 

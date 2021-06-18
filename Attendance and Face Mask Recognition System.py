@@ -1,5 +1,3 @@
-from modelTraining import train_model
-from recognizer import recognize_attendence
 from GUI.mainWindow import MainWindow
 from PySide2.QtWidgets import QApplication
 import sys

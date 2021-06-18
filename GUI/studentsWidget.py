@@ -5,7 +5,6 @@ from PySide2.QtCore import Signal
 from PySide2.QtCore import Qt
 import csv
 from modelTraining import train_model
-from recognizer import recognize_attendence
 
 """
     Right chart 
