@@ -65,8 +65,8 @@ class StudentsWidget(QWidget):
         for col in range(self.studentsTable.columnCount()):
             header.setSectionResizeMode(col, QHeaderView.Stretch)
         self.studentsTable.setHorizontalHeaderItem(3, QTableWidgetItem("Take Images Data"))
-        self.attendanceTable.setColumnCount(2)
-        self.attendanceTable.setHorizontalHeaderLabels(["ID", "Name"])
+        self.attendanceTable.setColumnCount(3)
+        self.attendanceTable.setHorizontalHeaderLabels(["ID", "Name", "Is Masked?"])
         header = self.attendanceTable.horizontalHeader()
         for col in range(self.attendanceTable.columnCount()):
             header.setSectionResizeMode(col, QHeaderView.Stretch)
@@ -156,6 +156,7 @@ class StudentsWidget(QWidget):
         :param data: students data
         :return:
         """
+        noOfUnmasked = 0
         self.attendanceTable.setRowCount(0)
         row = 0
         for id in data:
@@ -163,9 +164,33 @@ class StudentsWidget(QWidget):
             item = QTableWidgetItem(id)
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.attendanceTable.setItem(row, 0, item)
-            item = QTableWidgetItem(data[id])
+            item = QTableWidgetItem(data[id]["name"])
             item.setFlags(item.flags() ^ Qt.ItemIsEditable)
             self.attendanceTable.setItem(row, 1, item)
+            item = QTableWidgetItem()
+            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+            if data[id]["masked"]:
+                item.setText("Yes")
+                item.setBackgroundColor(QColor(0, 255, 0))
+            else:
+                item.setText("No")
+                item.setBackgroundColor(QColor(255, 0, 0))
+                noOfUnmasked += 1
+            self.attendanceTable.setItem(row, 2, item)
+            row += 1
+        self.attendanceTable.insertRow(row)
+        item = QTableWidgetItem("Total percentage of unmasked students:")
+        self.attendanceTable.setSpan(row, 0, 1, 2)
+        self.attendanceTable.setItem(row, 0, item)
+        perc = noOfUnmasked / (self.attendanceTable.rowCount() - 1) * 100
+        item = QTableWidgetItem(str(perc) + "%")
+        if perc >= 50:
+            item.setBackgroundColor(QColor(255, 0, 0))
+        elif 30 <= perc < 50:
+            item.setBackgroundColor(QColor(255, 255, 0))
+        elif perc < 30:
+            item.setBackgroundColor(QColor(0, 255, 0))
+        self.attendanceTable.setItem(row, 2, item)
 
     def _save_btn_clicked(self):
         self.write_csv()

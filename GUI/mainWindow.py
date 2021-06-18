@@ -29,6 +29,8 @@ class MainWindow(QMainWindow):
         Connects signals with handlers and other components.
         :return:
         """
+        self.setWindowTitle("Attendance and Face Mask Recognition System")
+        self.setWindowIcon(QIcon("Data/icons/icon.png"))
         self.studentsWidget.captureImages.connect(self.capture_images)
         self.studentsWidget.takeAttendance.connect(self.take_attendance)
         self.studentsWidget.endAttendance.connect(self.end_attendance)
