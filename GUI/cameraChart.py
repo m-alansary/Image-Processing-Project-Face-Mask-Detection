@@ -2,6 +2,11 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from camera import Camera
 
+"""
+    left chart 
+    Camera area with current student data table
+"""
+
 
 class CameraChart(QWidget):
     def __init__(self, parent=None):
@@ -24,12 +29,20 @@ class CameraChart(QWidget):
         self._init_style()
 
     def _init_ui(self):
+        """
+        Draws the GUI in the widget
+        :return:
+        """
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.title)
         self.layout().addWidget(self.image)
         self.layout().addWidget(self.infoTable)
 
     def _init_style(self):
+        """
+        Change the styles of the widget
+        :return:
+        """
         self.image.setFixedSize(640, 480)
         self.setFixedWidth(640)
         self.infoTable.setRowCount(3)

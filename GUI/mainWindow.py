@@ -14,6 +14,10 @@ class MainWindow(QMainWindow):
         self._start_communication()
 
     def _init_ui(self):
+        """
+        Draws the GUI in the widget
+        :return:
+        """
         widget = QWidget()
         widget.setLayout(QHBoxLayout())
         widget.layout().addWidget(self.cameraChart)
@@ -21,6 +25,10 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
     def _start_communication(self):
+        """
+        Connects signals with handlers and other components.
+        :return:
+        """
         self.studentsWidget.captureImages.connect(self.capture_images)
         self.studentsWidget.takeAttendance.connect(self.take_attendance)
         self.studentsWidget.endAttendance.connect(self.end_attendance)

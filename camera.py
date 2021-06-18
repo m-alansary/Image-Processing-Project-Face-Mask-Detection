@@ -13,15 +13,29 @@ from studentsData import get_student, attend_studnet
 
 threshold = 67  # percentage
 
+"""
+    Responsible for interfacing with web cam and the logic envolving the camera
+    The class is a QThead that runs in the background and emits the image to be shown in the GUI
+"""
+
 
 class Camera(QThread):
     updateImage = Signal(str, QImage, dict)  # Title, image
 
     def set_method(self, name, params={}):
+        """
+        :param name:  Method (function_ required to run the background
+        :param params: the parameters of that method
+        :return: None
+        """
         self.name = name
         self.params = params
 
     def run(self):
+        """
+        Thread main function that calls the method set using set_method function
+        :return: None
+        """
         self.isActive = True
         if self.name == "test_and_detect":
             self.test_and_detect()
@@ -33,6 +47,10 @@ class Camera(QThread):
             self.recognize_attendence(self.params["students"])
 
     def test_and_detect(self):
+        """
+        tests the camera and detect the faces and add square around them
+        :return: None
+        """
         # Load the cascade
         cascadeFace = cv2.CascadeClassifier('haarcascade_default.xml')
 
@@ -59,6 +77,13 @@ class Camera(QThread):
         cv2.destroyAllWindows()
 
     def capture_training_images(self, name: str, id: int, path="Training Images"):
+        """
+        capture the training images (basic or masked) for a particular student.
+        :param name: Student name
+        :param id: Student ID (the handling of unique is from other class)
+        :param path: path to save pictures at
+        :return:
+        """
         if name.replace(" ", "").isalpha():
             cam = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             detector = cv2.CascadeClassifier("haarcascade_default.xml")
@@ -91,6 +116,11 @@ class Camera(QThread):
             return row
 
     def recognize_attendence(self, students: dict):
+        """
+        recognize the attendance
+        :param students: Students id -> name
+        :return:
+        """
         recognizer = cv2.face.LBPHFaceRecognizer_create()
         recognizer.read("Training Images Labels" + os.sep + "Trainner.yml")
         recognizerMask = cv2.face.LBPHFaceRecognizer_create()
@@ -157,6 +187,13 @@ class Camera(QThread):
         self.emit_image('', None)
 
     def emit_image(self, title, image, data={}):
+        """
+        emits the image to be shown in the GUI
+        :param title: Image title
+        :param image: Image to show
+        :param data: Extra data (name, id, is masked, etc)
+        :return:
+        """
         if image is not None:
             height, width, bytesPerComponent = image.shape
             bytesPerLine = bytesPerComponent * width
@@ -169,6 +206,10 @@ class Camera(QThread):
             self.updateImage.emit('', QImage(), data)
 
     def stop(self):
+        """
+        stops the thread from running.
+        :return:
+        """
         self.emit_image('', None)
         self.isActive = False
         self.quit()

@@ -7,6 +7,11 @@ import csv
 from modelTraining import train_model
 from recognizer import recognize_attendence
 
+"""
+    Right chart 
+    Students table and attendace table
+"""
+
 
 class StudentsWidget(QWidget):
     captureImages = Signal(int, str)
@@ -29,6 +34,10 @@ class StudentsWidget(QWidget):
         self.load_csv()
 
     def _init_ui(self):
+        """
+        Draws the GUI in the widget
+        :return:
+        """
         studentsWidget = QWidget(self)
         studentsWidget.setLayout(QHBoxLayout(self))
         self.setLayout(QHBoxLayout())
@@ -63,6 +72,10 @@ class StudentsWidget(QWidget):
             header.setSectionResizeMode(col, QHeaderView.Stretch)
 
     def _start_communication(self):
+        """
+        Connects signals with handlers and other components.
+        :return:
+        """
         self.addBtn.clicked.connect(self._add_btn_clicked)
         self.removeBtn.clicked.connect(self._remove_btn_clicked)
         self.saveBtn.clicked.connect(self._save_btn_clicked)
@@ -70,6 +83,10 @@ class StudentsWidget(QWidget):
         self.attendanceBtn.clicked.connect(self.take_attendance)
 
     def _add_btn_clicked(self):
+        """
+        add new student button handler
+        :return:
+        """
         row = self.studentsTable.rowCount()
         self.studentsTable.insertRow(row)
         btn = QPushButton("Capture Training Images")
@@ -77,6 +94,10 @@ class StudentsWidget(QWidget):
         self.studentsTable.setCellWidget(row, 3, btn)
 
     def _remove_btn_clicked(self):
+        """
+        remove selected students button handler
+        :return:
+        """
         rowsToDelete = []
         for index in self.studentsTable.selectedIndexes():
             row = index.row()
@@ -86,6 +107,10 @@ class StudentsWidget(QWidget):
             self.studentsTable.removeRow(row)
 
     def _train_btn_clicked(self):
+        """
+        Train model button handler
+        :return:
+        """
         self.trainBtn.setEnabled(False)
         self.trainBtn.setText("Training...")
         QApplication.processEvents()
@@ -94,11 +119,20 @@ class StudentsWidget(QWidget):
         self.trainBtn.setEnabled(True)
 
     def _add_btn_at_row(self, row):
+        """
+        add "Capture Training Images" button in table at specific row.
+        :param row: row number (0 -> row count - 1)
+        :return:
+        """
         btn = QPushButton("Capture Training Images")
         btn.clicked.connect(lambda: self.capture_images(row))
         self.studentsTable.setCellWidget(row, 3, btn)
 
     def take_attendance(self):
+        """
+        take / end attendance button handler
+        :return:
+        """
         if self.attendanceBtn.text() == "Take Attendance":
             students = self.get_students()
             self.takeAttendance.emit(students)
@@ -108,12 +142,20 @@ class StudentsWidget(QWidget):
             self.attendanceBtn.setText("Take Attendance")
 
     def get_students(self):
+        """
+        :return: studnet in the table (id -> name)
+        """
         students = {}
         for row in range(self.studentsTable.rowCount()):
             students[int(self.studentsTable.item(row, 0).text())] = self.studentsTable.item(row, 1).text()
         return students
 
     def set_attendance(self, data):
+        """
+        load studnet attendance in attendance table.
+        :param data: students data
+        :return:
+        """
         self.attendanceTable.setRowCount(0)
         row = 0
         for id in data:
@@ -129,6 +171,10 @@ class StudentsWidget(QWidget):
         self.write_csv()
 
     def load_csv(self):
+        """
+        load students data from CSV file
+        :return:
+        """
         with open(self.csvFileName) as fileInput:
             row = 0
             for rowData in csv.reader(fileInput, delimiter=','):
@@ -145,6 +191,10 @@ class StudentsWidget(QWidget):
                 row += 1
 
     def write_csv(self):
+        """
+        save students data into CSV file
+        :return:
+        """
         with open(self.csvFileName, "w", newline='') as fileOutput:
             writer = csv.writer(fileOutput, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             for row in range(self.studentsTable.rowCount()):
@@ -159,6 +209,11 @@ class StudentsWidget(QWidget):
                 writer.writerow(fields)
 
     def capture_images(self, row):
+        """
+        capture button clicked
+        :param row: row number
+        :return:
+        """
         id = int(self.studentsTable.item(row, 0).text())
         name = self.studentsTable.item(row, 1).text()
         self.captureImages.emit(id, name)
