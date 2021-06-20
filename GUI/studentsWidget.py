@@ -1,3 +1,5 @@
+import os
+
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 from PySide2 import QtGui
@@ -28,6 +30,7 @@ class StudentsWidget(QWidget):
         self.saveBtn = QPushButton("Save")
         self.trainBtn = QPushButton("Train Model")
         self.attendanceBtn = QPushButton("Take Attendance")
+        self.saveAttendanceBtn = QPushButton("Save Attendance")
         self._init_ui()
         self._start_communication()
         self.load_csv()
@@ -53,6 +56,7 @@ class StudentsWidget(QWidget):
         attendanceWidget.layout().addWidget(self.attendanceTable)
         btnsLayout = QVBoxLayout(self)
         btnsLayout.addWidget(self.attendanceBtn)
+        btnsLayout.addWidget(self.saveAttendanceBtn)
         btnsLayout.addStretch()
         attendanceWidget.layout().addLayout(btnsLayout)
         self.tabWidget.addTab(studentsWidget, "Students")
@@ -65,10 +69,14 @@ class StudentsWidget(QWidget):
             header.setSectionResizeMode(col, QHeaderView.Stretch)
         self.studentsTable.setHorizontalHeaderItem(3, QTableWidgetItem("Take Images Data"))
         self.attendanceTable.setColumnCount(3)
+        self.attendanceTable.setRowCount(10)
         self.attendanceTable.setHorizontalHeaderLabels(["ID", "Name", "Is Masked?"])
         header = self.attendanceTable.horizontalHeader()
         for col in range(self.attendanceTable.columnCount()):
             header.setSectionResizeMode(col, QHeaderView.Stretch)
+        for row in range(self.attendanceTable.rowCount()):
+            for col in range(self.attendanceTable.columnCount()):
+                self.attendanceTable.setItem(row, col, QTableWidgetItem(str(row) + str(col)))
 
     def _start_communication(self):
         """
@@ -80,6 +88,7 @@ class StudentsWidget(QWidget):
         self.saveBtn.clicked.connect(self._save_btn_clicked)
         self.trainBtn.clicked.connect(self._train_btn_clicked)
         self.attendanceBtn.clicked.connect(self.take_attendance)
+        self.saveAttendanceBtn.clicked.connect(self._save_attendance_btn_clicked)
 
     def _add_btn_clicked(self):
         """
@@ -139,6 +148,22 @@ class StudentsWidget(QWidget):
         else:
             self.endAttendance.emit()
             self.attendanceBtn.setText("Take Attendance")
+
+    def _save_attendance_btn_clicked(self):
+        fileName = QFileDialog.getSaveFileName(None, "Save Attendance", "/", "(*.csv);;")
+        fileName = fileName[0]
+        with open(fileName, "w", newline='') as fileOutput:
+            writer = csv.writer(fileOutput, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            for row in range(self.attendanceTable.rowCount()):
+                if row == 0:
+                    fields = []
+                    for col in range(0, self.attendanceTable.columnCount()):
+                        fields.append(self.attendanceTable.horizontalHeaderItem(col).text())
+                    writer.writerow(fields)
+                fields = []
+                for col in range(0, self.attendanceTable.columnCount()):
+                    fields.append(self.attendanceTable.item(row, col).text())
+                writer.writerow(fields)
 
     def get_students(self):
         """
