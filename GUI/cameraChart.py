@@ -74,7 +74,7 @@ class CameraChart(QWidget):
                     self.infoTable.item(1, 0).setText(data["name"])
                 if "isAttendance" in data:
                     if data["isAttendance"]:
-                        value = {"name": data["name"], "masked": data["masked"]}
+                        value = {"name": data["name"], "masked": data["masked"], "time": data["time"]}
                         self.attendanceData[data["id"]] = value
             else:
                 self.infoTable.item(1, 0).setText("")

@@ -68,15 +68,11 @@ class StudentsWidget(QWidget):
         for col in range(self.studentsTable.columnCount()):
             header.setSectionResizeMode(col, QHeaderView.Stretch)
         self.studentsTable.setHorizontalHeaderItem(3, QTableWidgetItem("Take Images Data"))
-        self.attendanceTable.setColumnCount(3)
-        self.attendanceTable.setRowCount(10)
-        self.attendanceTable.setHorizontalHeaderLabels(["ID", "Name", "Is Masked?"])
+        self.attendanceTable.setColumnCount(4)
+        self.attendanceTable.setHorizontalHeaderLabels(["ID", "Name", "Is Masked?", "Time"])
         header = self.attendanceTable.horizontalHeader()
         for col in range(self.attendanceTable.columnCount()):
             header.setSectionResizeMode(col, QHeaderView.Stretch)
-        for row in range(self.attendanceTable.rowCount()):
-            for col in range(self.attendanceTable.columnCount()):
-                self.attendanceTable.setItem(row, col, QTableWidgetItem(str(row) + str(col)))
 
     def _start_communication(self):
         """
@@ -154,16 +150,19 @@ class StudentsWidget(QWidget):
         fileName = fileName[0]
         with open(fileName, "w", newline='') as fileOutput:
             writer = csv.writer(fileOutput, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            for row in range(self.attendanceTable.rowCount()):
+            for row in range(self.attendanceTable.rowCount() - 1):
                 if row == 0:
                     fields = []
                     for col in range(0, self.attendanceTable.columnCount()):
                         fields.append(self.attendanceTable.horizontalHeaderItem(col).text())
                     writer.writerow(fields)
                 fields = []
-                for col in range(0, self.attendanceTable.columnCount()):
+                for col in range(self.attendanceTable.columnCount()):
                     fields.append(self.attendanceTable.item(row, col).text())
                 writer.writerow(fields)
+            fields = [self.attendanceTable.item(row, 0).text(), "", self.attendanceTable.item(row, 2)]
+            writer.writerow(fields)
+
 
     def get_students(self):
         """
@@ -201,6 +200,9 @@ class StudentsWidget(QWidget):
                 item.setBackgroundColor(QColor(255, 0, 0))
                 noOfUnmasked += 1
             self.attendanceTable.setItem(row, 2, item)
+            item = QTableWidgetItem(data[id]["time"])
+            item.setFlags(item.flags() ^ Qt.ItemIsEditable)
+            self.attendanceTable.setItem(row, 3, item)
             row += 1
         self.attendanceTable.insertRow(row)
         item = QTableWidgetItem("Total percentage of unmasked students:")
@@ -214,6 +216,7 @@ class StudentsWidget(QWidget):
             item.setBackgroundColor(QColor(255, 255, 0))
         elif perc < 30:
             item.setBackgroundColor(QColor(0, 255, 0))
+        self.attendanceTable.setSpan(row, 2, 1, 2)
         self.attendanceTable.setItem(row, 2, item)
 
     def _save_btn_clicked(self):

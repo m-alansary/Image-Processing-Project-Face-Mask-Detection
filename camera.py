@@ -6,6 +6,7 @@ import sys
 
 from PySide2.QtCore import *
 from PySide2.QtGui import *
+from datetime import datetime
 
 threshold = 67  # percentage
 
@@ -151,6 +152,8 @@ class Camera(QThread):
                     imageText = str(id)
                     data["id"] = str(id)
                     data["name"] = name
+                    now = datetime.now()
+                    data["time"] = now.strftime("%H:%M:%S")
                     if masked:
                         imageText += " [Masked]"
                         data["masked"] = True
