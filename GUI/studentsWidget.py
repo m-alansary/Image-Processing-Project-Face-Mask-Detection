@@ -160,7 +160,8 @@ class StudentsWidget(QWidget):
                 for col in range(self.attendanceTable.columnCount()):
                     fields.append(self.attendanceTable.item(row, col).text())
                 writer.writerow(fields)
-            fields = [self.attendanceTable.item(row, 0).text(), "", self.attendanceTable.item(row, 2)]
+            row += 1
+            fields = [self.attendanceTable.item(row, 0).text(), "", self.attendanceTable.item(row, 2).text()]
             writer.writerow(fields)
 
 
